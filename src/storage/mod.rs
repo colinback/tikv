@@ -253,7 +253,9 @@ impl Command {
             Command::ScanLock { .. } |
             Command::RawGet { .. } |
             Command::RawScan { .. } |
-            Command::Pause { .. } => true,
+            Command::Pause { .. } |
+            Command::KeyMvcc { .. } |
+            Command::StarttsMvcc { .. } => true,
             Command::ResolveLock { ref keys, .. } |
             Command::Gc { ref keys, .. } => keys.is_empty(),
             _ => false,
@@ -310,13 +312,9 @@ impl Command {
             Command::Gc { safe_point, .. } => safe_point,
             Command::StarttsMvcc { start_ts, .. } => start_ts,
             Command::RawGet { .. } |
-<<<<<<< HEAD
             Command::RawScan { .. } |
-            Command::Pause { .. } => 0,
-=======
             Command::Pause { .. } |
             Command::KeyMvcc { .. } => 0,
->>>>>>> *: add key_mvcc and startts_mvcc for txn debugger
         }
     }
 
@@ -333,14 +331,10 @@ impl Command {
             Command::ResolveLock { ref ctx, .. } |
             Command::Gc { ref ctx, .. } |
             Command::RawGet { ref ctx, .. } |
-<<<<<<< HEAD
             Command::RawScan { ref ctx, .. } |
-            Command::Pause { ref ctx, .. } => ctx,
-=======
             Command::Pause { ref ctx, .. } |
             Command::KeyMvcc { ref ctx, .. } |
             Command::StarttsMvcc { ref ctx, .. } => ctx,
->>>>>>> *: add key_mvcc and startts_mvcc for txn debugger
         }
     }
 
@@ -357,14 +351,10 @@ impl Command {
             Command::ResolveLock { ref mut ctx, .. } |
             Command::Gc { ref mut ctx, .. } |
             Command::RawGet { ref mut ctx, .. } |
-<<<<<<< HEAD
             Command::RawScan { ref mut ctx, .. } |
-            Command::Pause { ref mut ctx, .. } => ctx,
-=======
             Command::Pause { ref mut ctx, .. } |
             Command::KeyMvcc { ref mut ctx, .. } |
             Command::StarttsMvcc { ref mut ctx, .. } => ctx,
->>>>>>> *: add key_mvcc and startts_mvcc for txn debugger
         }
     }
 }
