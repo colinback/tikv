@@ -80,7 +80,7 @@ pub enum StorageCb {
     SingleValue(Callback<Option<Value>>),
     KvPairs(Callback<Vec<Result<KvPair>>>),
     MvccPairs(Callback<Vec<MvccPair>>),
-    StarttsMvccPair(Callback<Option<(Key, Vec<MvccPair>)>>),
+    StartTsMvccPair(Callback<Option<(Key, Vec<MvccPair>)>>),
     Locks(Callback<Vec<LockInfo>>),
 }
 
@@ -147,7 +147,7 @@ pub enum Command {
     },
     Pause { ctx: Context, duration: u64 },
     KeyMvcc { ctx: Context, key: Key },
-    StarttsMvcc { ctx: Context, start_ts: u64 },
+    StartTsMvcc { ctx: Context, start_ts: u64 },
 }
 
 impl Display for Command {
@@ -229,7 +229,7 @@ impl Display for Command {
             Command::KeyMvcc { ref ctx, ref key } => {
                 write!(f, "kv::command::scanmvcc {:?} | {:?}", key, ctx)
             }
-            Command::StarttsMvcc { ref ctx, ref start_ts } => {
+            Command::StartTsMvcc { ref ctx, ref start_ts } => {
                 write!(f, "kv::command::starttsmvcc {:?} | {:?}", start_ts, ctx)
             }
         }
@@ -255,7 +255,7 @@ impl Command {
             Command::RawScan { .. } |
             Command::Pause { .. } |
             Command::KeyMvcc { .. } |
-            Command::StarttsMvcc { .. } => true,
+            Command::StartTsMvcc { .. } => true,
             Command::ResolveLock { ref keys, .. } |
             Command::Gc { ref keys, .. } => keys.is_empty(),
             _ => false,
@@ -294,7 +294,7 @@ impl Command {
             Command::RawScan { .. } => "raw_scan",
             Command::Pause { .. } => "pause",
             Command::KeyMvcc { .. } => "key_mvcc",
-            Command::StarttsMvcc { .. } => "start_ts_mvcc",
+            Command::StartTsMvcc { .. } => "start_ts_mvcc",
         }
     }
 
@@ -310,7 +310,7 @@ impl Command {
             Command::Commit { lock_ts, .. } => lock_ts,
             Command::ScanLock { max_ts, .. } => max_ts,
             Command::Gc { safe_point, .. } => safe_point,
-            Command::StarttsMvcc { start_ts, .. } => start_ts,
+            Command::StartTsMvcc { start_ts, .. } => start_ts,
             Command::RawGet { .. } |
             Command::RawScan { .. } |
             Command::Pause { .. } |
@@ -334,7 +334,7 @@ impl Command {
             Command::RawScan { ref ctx, .. } |
             Command::Pause { ref ctx, .. } |
             Command::KeyMvcc { ref ctx, .. } |
-            Command::StarttsMvcc { ref ctx, .. } => ctx,
+            Command::StartTsMvcc { ref ctx, .. } => ctx,
         }
     }
 
@@ -354,7 +354,7 @@ impl Command {
             Command::RawScan { ref mut ctx, .. } |
             Command::Pause { ref mut ctx, .. } |
             Command::KeyMvcc { ref mut ctx, .. } |
-            Command::StarttsMvcc { ref mut ctx, .. } => ctx,
+            Command::StartTsMvcc { ref mut ctx, .. } => ctx,
         }
     }
 }
@@ -729,17 +729,17 @@ impl Storage {
         Ok(())
     }
 
-    pub fn async_startts_mvcc(&self,
-                              ctx: Context,
-                              start_ts: u64,
-                              callback: Callback<Option<(Key, Vec<MvccPair>)>>)
-                              -> Result<()> {
-        let cmd = Command::StarttsMvcc {
+    pub fn async_start_ts_mvcc(&self,
+                               ctx: Context,
+                               start_ts: u64,
+                               callback: Callback<Option<(Key, Vec<MvccPair>)>>)
+                               -> Result<()> {
+        let cmd = Command::StartTsMvcc {
             ctx: ctx,
             start_ts: start_ts,
         };
         let tag = cmd.tag();
-        self.send(cmd, StorageCb::StarttsMvccPair(callback))?;
+        self.send(cmd, StorageCb::StartTsMvccPair(callback))?;
         KV_COMMAND_COUNTER_VEC.with_label_values(&[tag]).inc();
         Ok(())
     }
