@@ -408,7 +408,7 @@ fn process_read(cid: u64, mut cmd: Command, ch: SyncSendCh<Msg>, snapshot: Box<S
                 Err(e) => ProcessResult::Failed { err: e.into() },
             }
         }
-        Command::KeyMvcc { ref ctx, ref key } => {
+        Command::MvccByKey { ref ctx, ref key } => {
             let mut reader = MvccReader::new(snapshot.as_ref(),
                                              &mut statistics,
                                              Some(ScanMode::Forward),
@@ -430,7 +430,7 @@ fn process_read(cid: u64, mut cmd: Command, ch: SyncSendCh<Msg>, snapshot: Box<S
                 }
             }
         }
-        Command::StartTsMvcc { ref ctx, start_ts } => {
+        Command::MvccByStartTs { ref ctx, start_ts } => {
             let mut reader = MvccReader::new(snapshot.as_ref(),
                                              &mut statistics,
                                              Some(ScanMode::Forward),
