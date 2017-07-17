@@ -379,15 +379,14 @@ mod test {
                     ScalarFuncSig::CastDurationAsDuration),
                     Datum::Dur(Duration::parse(b"-31 11:30:45", 6).unwrap())),
                 (build_expr_with_sig(
-                    vec![Datum::Dur(Duration::from_nanos(122837 * NANOS_PER_SEC + 123_456_789, 6).unwrap())],
+                    vec![Datum::Dur(Duration::from_nanos(122837 * NANOS_PER_SEC + 123_456_000, 6).unwrap())],
                     ExprType::ScalarFunc,
                     ScalarFuncSig::CastDurationAsDuration),
-                    Datum::Dur(Duration::parse(b"1 10:07:17.123457", 6).unwrap())),
+                    Datum::Dur(Duration::parse(b"1 10:07:17.123456", 6).unwrap())),
                 (build_expr_with_sig(
                     vec![Datum::Dur(Duration::from_nanos(122837 * NANOS_PER_SEC + 100_000_000, 6).unwrap())],
                     ExprType::ScalarFunc,
                     ScalarFuncSig::CastDurationAsDuration),
                     Datum::Dur(Duration::parse(b"1 10:07:17.1", 6).unwrap())),
-
         ]);
 }
