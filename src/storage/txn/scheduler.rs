@@ -1118,6 +1118,14 @@ mod tests {
                                      safe_point: 5,
                                      scan_key: None,
                                      keys: vec![make_key(b"k")],
+                                 },
+                                 Command::MvccByKey {
+                                     ctx: Context::new(),
+                                     key: make_key(b"k"),
+                                 },
+                                 Command::MvccByStartTs {
+                                     ctx: Context::new(),
+                                     start_ts: 25,
                                  }];
         let write_cmds = vec![Command::Prewrite {
                                   ctx: Context::new(),
