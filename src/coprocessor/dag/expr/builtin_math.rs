@@ -109,6 +109,12 @@ impl ScalarFunc {
     }
 
     #[inline]
+    pub fn round_real(&self, ctx: &mut EvalContext, row: &[Datum]) -> Result<Option<f64>> {
+        let n = try_opt!(self.children[0].eval_real(ctx, row));
+        Ok(Some(n.round()))
+    }
+
+    #[inline]
     pub fn crc32(&self, ctx: &mut EvalContext, row: &[Datum]) -> Result<Option<i64>> {
         let d = try_opt!(self.children[0].eval_string(ctx, row));
         let mut digest = crc32::Digest::new(crc32::IEEE);
@@ -302,6 +308,46 @@ mod test {
             if sig == ScalarFuncSig::FloorIntToDec || sig == ScalarFuncSig::FloorDecToDec {
                 op.mut_tp().set_flen(convert::UNSPECIFIED_LENGTH);
                 op.mut_tp().set_decimal(convert::UNSPECIFIED_LENGTH);
+            }
+            let got = op.eval(&mut ctx, &[]).unwrap();
+            assert_eq!(got, exp);
+        }
+    }
+
+    #[test]
+    fn test_round() {
+        let tests = vec![
+            (ScalarFuncSig::RoundReal, Datum::F64(3.45), Datum::F64(3f64)),
+            (
+                ScalarFuncSig::RoundReal,
+                Datum::F64(-3.45),
+                Datum::F64(-3f64),
+            ),
+            (ScalarFuncSig::RoundReal, Datum::F64(3.55), Datum::F64(4f64)),
+            (
+                ScalarFuncSig::RoundReal,
+                Datum::F64(-3.55),
+                Datum::F64(-4f64),
+            ),
+            (
+                ScalarFuncSig::RoundReal,
+                Datum::F64(f64::MAX),
+                Datum::F64(f64::MAX),
+            ),
+            (
+                ScalarFuncSig::RoundReal,
+                Datum::F64(f64::MIN),
+                Datum::F64(f64::MIN),
+            ),
+        ];
+
+        let mut ctx = EvalContext::new(Arc::new(EvalConfig::new(0, FLAG_IGNORE_TRUNCATE).unwrap()));
+        for (sig, arg, exp) in tests {
+            let arg = datum_expr(arg);
+            let mut op =
+                Expression::build(&mut ctx, scalar_func_expr(sig, &[arg.clone()])).unwrap();
+            if mysql::has_unsigned_flag(arg.get_field_type().get_flag()) {
+                op.mut_tp().set_flag(types::UNSIGNED_FLAG as u32);
             }
             let got = op.eval(&mut ctx, &[]).unwrap();
             assert_eq!(got, exp);
